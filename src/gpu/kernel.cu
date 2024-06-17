@@ -11,13 +11,12 @@
 #define TILE_WIDTH 16
 #define TILE_HEIGHT 16
 
-
 __device__ int mask1[3][3] = {{-1, -2, -1}, {0, 0, 0}, {1, 2, 1}};
 __device__ int mask2[3][3] = {{-1, 0, 1}, {-2, 0, 2}, {-1, 0, 1}};
 
 // Kernel function for the canny edge detector
 // Computes the gradient of edges and fixes broken edges
-__global__ void hysterysis(Rgb *device_img, int* changed, int width, int height, double t)
+__global__ void hysterysis(Rgb *device_img, int *changed, int width, int height, double t)
 {
     int x = blockIdx.x * blockDim.x + threadIdx.x;
     int y = blockIdx.y * blockDim.y + threadIdx.y;
@@ -29,11 +28,7 @@ __global__ void hysterysis(Rgb *device_img, int* changed, int width, int height,
     double curr_dir = device_img[x + y * width].b;
     double curr_grad = device_img[x + y * width].g;
     changed[0] = 0;
-    if (22.5 <= curr_dir and curr_dir < 67.5
-            and (x - 1) >= 0
-            and (y + 1) < height
-            and (x + 1) < width
-            and (y - 1) >= 0)
+    if (22.5 <= curr_dir and curr_dir < 67.5 and (x - 1) >= 0 and (y + 1) < height and (x + 1) < width and (y - 1) >= 0)
     {
         double dir1 = device_img[(x - 1) + (y + 1) * width].b;
         double dir2 = device_img[(x + 1) + (y - 1) * width].b;
@@ -43,9 +38,7 @@ __global__ void hysterysis(Rgb *device_img, int* changed, int width, int height,
             changed[0] = 1;
         }
     }
-    else if (67.5 <= curr_dir and curr_dir < 112.5
-            and (x - 1) >= 0
-            and (x + 1) < width)
+    else if (67.5 <= curr_dir and curr_dir < 112.5 and (x - 1) >= 0 and (x + 1) < width)
     {
         double dir1 = device_img[(x - 1) + y * width].b;
         double dir2 = device_img[(x + 1) + y * width].b;
@@ -55,11 +48,7 @@ __global__ void hysterysis(Rgb *device_img, int* changed, int width, int height,
             changed[0] = 1;
         }
     }
-    else if (112.5 <= curr_dir and curr_dir < 157.5
-            and (x - 1) >= 0
-            and (y - 1) >= 0
-            and (x + 1) < width
-            and (y + 1) < height)
+    else if (112.5 <= curr_dir and curr_dir < 157.5 and (x - 1) >= 0 and (y - 1) >= 0 and (x + 1) < width and (y + 1) < height)
     {
         double dir1 = device_img[(x - 1) + (y - 1) * width].b;
         double dir2 = device_img[(x + 1) + (y + 1) * width].b;
@@ -69,15 +58,11 @@ __global__ void hysterysis(Rgb *device_img, int* changed, int width, int height,
             changed[0] = 1;
         }
     }
-    else if (((0 <= curr_dir and curr_dir < 22.5)
-                or (157.5 <= curr_dir and curr_dir <= 180.0))
-            and (y - 1) >= 0
-            and (y + 1) < height)
+    else if (((0 <= curr_dir and curr_dir < 22.5) or (157.5 <= curr_dir and curr_dir <= 180.0)) and (y - 1) >= 0 and (y + 1) < height)
     {
         double dir1 = device_img[x + (y - 1) * width].b;
         double dir2 = device_img[x + (y + 1) * width].b;
-        if ((((0 <= dir1 and dir1 < 22.5) and (157.5 <= dir1 and dir1 <= 180.5))
-                    or ((0 <= dir2 and dir2 < 22.5) and (157.5 <= dir2 and dir2 <= 180.5))) and curr_grad > t)
+        if ((((0 <= dir1 and dir1 < 22.5) and (157.5 <= dir1 and dir1 <= 180.5)) or ((0 <= dir2 and dir2 < 22.5) and (157.5 <= dir2 and dir2 <= 180.5))) and curr_grad > t)
         {
             device_img[x + y * width].r = 255;
             changed[0] = 1;
@@ -86,7 +71,7 @@ __global__ void hysterysis(Rgb *device_img, int* changed, int width, int height,
 }
 
 // Classifies the gradient direction for each edges
-__global__ void non_max_suppr(Rgb *device_img, double* img, int width, int height, double thresh)
+__global__ void non_max_suppr(Rgb *device_img, double *img, int width, int height, double thresh)
 {
     int x = blockIdx.x * blockDim.x + threadIdx.x;
     int y = blockIdx.y * blockDim.y + threadIdx.y;
@@ -94,11 +79,7 @@ __global__ void non_max_suppr(Rgb *device_img, double* img, int width, int heigh
         return;
     double curr_dir = device_img[x + y * width].b;
     double curr_grad = device_img[x + y * width].g;
-    if (22.5 <= curr_dir and curr_dir < 67.5
-            and (x - 1) >= 0
-            and (y + 1) < height
-            and (x + 1) < width
-            and (y - 1) >= 0)
+    if (22.5 <= curr_dir and curr_dir < 67.5 and (x - 1) >= 0 and (y + 1) < height and (x + 1) < width and (y - 1) >= 0)
     {
         double val1 = device_img[(x - 1) + (y + 1) * width].g;
         double val2 = device_img[(x + 1) + (y - 1) * width].g;
@@ -107,9 +88,7 @@ __global__ void non_max_suppr(Rgb *device_img, double* img, int width, int heigh
         else
             device_img[x + y * width].r = 0;
     }
-    else if (67.5 <= curr_dir and curr_dir < 112.5
-            and (x - 1) >= 0
-            and (x + 1) < width)
+    else if (67.5 <= curr_dir and curr_dir < 112.5 and (x - 1) >= 0 and (x + 1) < width)
     {
         double val1 = device_img[(x - 1) + y * width].g;
         double val2 = device_img[(x + 1) + y * width].g;
@@ -118,11 +97,7 @@ __global__ void non_max_suppr(Rgb *device_img, double* img, int width, int heigh
         else
             device_img[x + y * width].r = 0;
     }
-    else if (112.5 <= curr_dir and curr_dir < 157.5
-            and (x - 1) >= 0
-            and (y - 1) >= 0
-            and (x + 1) < width
-            and (y + 1) < height)
+    else if (112.5 <= curr_dir and curr_dir < 157.5 and (x - 1) >= 0 and (y - 1) >= 0 and (x + 1) < width and (y + 1) < height)
     {
         double val1 = device_img[(x - 1) + (y - 1) * width].g;
         double val2 = device_img[(x + 1) + (y + 1) * width].g;
@@ -131,10 +106,7 @@ __global__ void non_max_suppr(Rgb *device_img, double* img, int width, int heigh
         else
             device_img[x + y * width].r = 0;
     }
-    else if (((0 <= curr_dir and curr_dir < 22.5)
-                or (157.5 <= curr_dir and curr_dir <= 180.0))
-            and (y - 1) >= 0
-            and (y + 1) < height)
+    else if (((0 <= curr_dir and curr_dir < 22.5) or (157.5 <= curr_dir and curr_dir <= 180.0)) and (y - 1) >= 0 and (y + 1) < height)
     {
         double val1 = device_img[x + (y - 1) * width].g;
         double val2 = device_img[x + (y + 1) * width].g;
@@ -146,7 +118,7 @@ __global__ void non_max_suppr(Rgb *device_img, double* img, int width, int heigh
 }
 
 // Computes a sobel convolution and compute the gradient direction
-__global__ void sobel_conv(Rgb *device_img, double* img, int width, int height, int conv_size)
+__global__ void sobel_conv(Rgb *device_img, double *img, int width, int height, int conv_size)
 {
 
     int x = blockIdx.x * blockDim.x + threadIdx.x;
@@ -183,11 +155,10 @@ __global__ void sobel_conv(Rgb *device_img, double* img, int width, int height, 
     d = (d > 0 ? d : (2 * M_PI + d)) * 360 / (2 * M_PI);
     device_img[x + y * width].g = g;
     device_img[x + y * width].b = d;
-
 }
 
 // Applies the convolution operator on the image
-__device__ void conv(Rgb *image, Rgb& rgb, int width, int height, int x1, int y1, int x2, int y2, int conv_size)
+__device__ void conv(Rgb *image, Rgb &rgb, int width, int height, int x1, int y1, int x2, int y2, int conv_size)
 {
     int cnt = 0;
     for (int j1 = y1 - conv_size; j1 < y1 + conv_size; j1++)
@@ -196,9 +167,9 @@ __device__ void conv(Rgb *image, Rgb& rgb, int width, int height, int x1, int y1
             int i2 = i1 - x1 + x2;
             int j2 = j1 - y1 + y2;
             if (i1 >= 0 and j1 >= 0 and
-                    j2 >= 0 and i2 >= 0 and
-                    i1 < height and j1 < width and
-                    i2 < height and j2 < width)
+                j2 >= 0 and i2 >= 0 and
+                i1 < height and j1 < width and
+                i2 < height and j2 < width)
             {
                 cnt++;
                 auto pix1 = image[i1 * width + j1];
@@ -208,7 +179,8 @@ __device__ void conv(Rgb *image, Rgb& rgb, int width, int height, int x1, int y1
                 rgb.b += std::pow(std::abs(pix1.b - pix2.b), 2);
             }
         }
-    if (cnt > 0) {
+    if (cnt > 0)
+    {
         rgb.r /= cnt;
         rgb.g /= cnt;
         rgb.b /= cnt;
@@ -216,7 +188,7 @@ __device__ void conv(Rgb *image, Rgb& rgb, int width, int height, int x1, int y1
 }
 
 // Applies a gaussian mask to the image
-__device__ void gauss_conv_nlm(Rgb *image, Rgb& res, int x, int y, int width, int height, int conv_size, int block_radius, double h_param)
+__device__ void gauss_conv_nlm(Rgb *image, Rgb &res, int x, int y, int width, int height, int conv_size, int block_radius, double h_param)
 {
     auto cnt = Rgb(0.0, 0.0, 0.0);
     for (int j = y - conv_size; j < y + conv_size; j++)
@@ -232,8 +204,8 @@ __device__ void gauss_conv_nlm(Rgb *image, Rgb& res, int x, int y, int width, in
                 double h_div = std::pow(h_param, 2);
 
                 auto c2 = Rgb(std::exp(-u.r / h_div),
-                        std::exp(-u.g / h_div),
-                        std::exp(-u.b / h_div));
+                              std::exp(-u.g / h_div),
+                              std::exp(-u.b / h_div));
 
                 res.r += uy.r * c1 * c2.r;
                 res.g += uy.g * c1 * c2.g;
@@ -254,7 +226,7 @@ __device__ void gauss_conv_nlm(Rgb *image, Rgb& res, int x, int y, int width, in
 }
 
 // Non Local-Means kernel function
-__global__ void nlm(Rgb* device_img, Rgb* img, int width, int height, int conv_size, int block_radius, double h_param)
+__global__ void nlm(Rgb *device_img, Rgb *img, int width, int height, int conv_size, int block_radius, double h_param)
 {
     int x = blockIdx.x * blockDim.x + threadIdx.x;
     int y = blockIdx.y * blockDim.y + threadIdx.y;
@@ -270,7 +242,7 @@ __global__ void nlm(Rgb* device_img, Rgb* img, int width, int height, int conv_s
 // Shared knn kernel function
 // Uses the K-Nearest Neighbors algorithm for de-noising an image
 // Uses the shared memory optimization
-__global__ void shared_knn(Rgb* device_img, Rgb* img, int width, int height, int strel_size, double h_param)
+__global__ void shared_knn(Rgb *device_img, Rgb *img, int width, int height, int strel_size, double h_param)
 {
     int r = strel_size / 2;
     int block_w = TILE_WIDTH + 2 * r;
@@ -306,8 +278,8 @@ __global__ void shared_knn(Rgb* device_img, Rgb* img, int width, int height, int
                     double h_div = std::pow(h_param, 2);
                     double c1 = std::exp(-(std::pow(std::abs(col_i + row_i + i + j - (row_o + col_o)), 2)) / (double)std::pow(r, 2));
                     auto c2 = Rgb(std::exp(-(std::pow(std::abs(uy.r - ux.r), 2)) / h_div),
-                            std::exp(-(std::pow(std::abs(uy.g - ux.g), 2)) / h_div),
-                            std::exp(-(std::pow(std::abs(uy.b - ux.b), 2)) / h_div));
+                                  std::exp(-(std::pow(std::abs(uy.g - ux.g), 2)) / h_div),
+                                  std::exp(-(std::pow(std::abs(uy.b - ux.b), 2)) / h_div));
 
                     sum.r += uy.r * c1 * c2.r;
                     sum.g += uy.g * c1 * c2.g;
@@ -328,7 +300,7 @@ __global__ void shared_knn(Rgb* device_img, Rgb* img, int width, int height, int
 
 // Shared knn kernel function
 // Uses the K-Nearest Neighbors algorithm for de-noising an image
-__device__ void gauss_conv(Rgb *image, Rgb& res, int x, int y, int width, int height, int conv_size, double h_param)
+__device__ void gauss_conv(Rgb *image, Rgb &res, int x, int y, int width, int height, int conv_size, double h_param)
 {
     auto cnt = Rgb(0.0, 0.0, 0.0);
     for (int j = y - conv_size; j < y + conv_size; j++)
@@ -343,8 +315,8 @@ __device__ void gauss_conv(Rgb *image, Rgb& res, int x, int y, int width, int he
                 double h_div = std::pow(h_param, 2);
 
                 auto c2 = Rgb(std::exp(-(std::pow(std::abs(uy.r - ux.r), 2)) / h_div),
-                        std::exp(-(std::pow(std::abs(uy.g - ux.g), 2)) / h_div),
-                        std::exp(-(std::pow(std::abs(uy.b - ux.b), 2)) / h_div));
+                              std::exp(-(std::pow(std::abs(uy.g - ux.g), 2)) / h_div),
+                              std::exp(-(std::pow(std::abs(uy.b - ux.b), 2)) / h_div));
 
                 res.r += uy.r * c1 * c2.r;
                 res.g += uy.g * c1 * c2.g;
@@ -365,7 +337,7 @@ __device__ void gauss_conv(Rgb *image, Rgb& res, int x, int y, int width, int he
 }
 
 // Hat function of the K-Nearest Neigbhors algorithm
-__global__ void knn(Rgb* device_img, Rgb* img, int width, int height, int conv_size, double h_param)
+__global__ void knn(Rgb *device_img, Rgb *img, int width, int height, int conv_size, double h_param)
 {
     int x = blockIdx.x * blockDim.x + threadIdx.x;
     int y = blockIdx.y * blockDim.y + threadIdx.y;
@@ -379,7 +351,7 @@ __global__ void knn(Rgb* device_img, Rgb* img, int width, int height, int conv_s
 }
 
 // Hat function of the K-Nearest Neigbhors algorithm
-__global__ void kernel_shared_conv(Rgb* device_img, Rgb* img, int width, int height, int strel_size)
+__global__ void kernel_shared_conv(Rgb *device_img, Rgb *img, int width, int height, int strel_size)
 {
     int r = strel_size / 2;
     int block_w = TILE_WIDTH + 2 * r;
@@ -425,7 +397,7 @@ __global__ void kernel_shared_conv(Rgb* device_img, Rgb* img, int width, int hei
 }
 
 // Hat function for the convolution algorithm
-__global__ void kernel_conv(Rgb* device_img, Rgb* img, int rows, int cols, int conv_size)
+__global__ void kernel_conv(Rgb *device_img, Rgb *img, int rows, int cols, int conv_size)
 {
     int cnt = 0;
     cnt = 0;
@@ -455,7 +427,7 @@ __global__ void kernel_conv(Rgb* device_img, Rgb* img, int rows, int cols, int c
 }
 
 // Pixelizes an image
-__global__ void kernel_pixelize(Rgb* device_img, Rgb* img, int rows, int cols, int pix_size)
+__global__ void kernel_pixelize(Rgb *device_img, Rgb *img, int rows, int cols, int pix_size)
 {
     extern __shared__ Rgb ds_img[];
     int bx = blockIdx.x;
@@ -485,11 +457,7 @@ __global__ void kernel_pixelize(Rgb* device_img, Rgb* img, int rows, int cols, i
                 {
                     for (int j = x - pix_size; j < x + pix_size && j < rows; j++)
                     {
-                        if (i >= 0 and j >= 0
-                                and i >= v * pix_size
-                                and i < (v + 1) * pix_size
-                                and j >= u * pix_size
-                                and j < (u + 1) * pix_size)
+                        if (i >= 0 and j >= 0 and i >= v * pix_size and i < (v + 1) * pix_size and j >= u * pix_size and j < (u + 1) * pix_size)
                         {
                             cnt++;
                             int ds_x = j - u * pix_size;
@@ -509,4 +477,3 @@ __global__ void kernel_pixelize(Rgb* device_img, Rgb* img, int rows, int cols, i
     device_img[x + y * rows].g /= cnt;
     device_img[x + y * rows].b /= cnt;
 }
-

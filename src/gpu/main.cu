@@ -14,8 +14,7 @@
 #define BLOCK_W (TILE_WIDTH + (2 * R))
 #define BLOCK_H (TILE_HEIGHT + (2 * R))
 
-
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
     if (argc < 3)
     {
@@ -34,27 +33,29 @@ int main(int argc, char** argv)
         return 1;
     }
     cv::Mat image;
-    image = cv::imread(argv[1], CV_LOAD_IMAGE_UNCHANGED);
+    image = cv::imread(argv[1], cv::IMREAD_UNCHANGED);
     if (!image.data)
     {
         std::cout << "Could not open or find the image" << std::endl;
         return 1;
     }
 
+    std::cout << "🥳 Image read successfully" << std::endl;
+
     int width = image.rows;
     int height = image.cols;
 
-    Rgb* device_dst;
-    Rgb* device_img;
-    Rgb* out;
-    Rgb* device_dst_grey;
-    double* device_img_grey;
-    Rgb* out_grey;
+    Rgb *device_dst;
+    Rgb *device_img;
+    Rgb *out;
+    Rgb *device_dst_grey;
+    double *device_img_grey;
+    Rgb *out_grey;
 
     cv::Mat grey_img;
     device_dst = empty_img_device(image);
     device_img = img_to_device(image);
-    out = (Rgb*)malloc(width * height * sizeof (Rgb));
+    out = (Rgb *)malloc(width * height * sizeof(Rgb));
 
     if (func_name == "pixelize")
         kernel_pixelize_host(device_dst, device_img, width, height, std::stoi(argv[3]));
@@ -73,9 +74,9 @@ int main(int argc, char** argv)
         cv::cvtColor(image, grey_img, cv::COLOR_BGR2GRAY);
         device_dst_grey = empty_img_device(grey_img);
         device_img_grey = img_to_device_grey(grey_img);
-        out_grey = (Rgb*)malloc(width * height * sizeof (Rgb));
+        out_grey = (Rgb *)malloc(width * height * sizeof(Rgb));
         cv::Mat dst;
-        double otsu_threshold = cv::threshold(grey_img, dst, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
+        double otsu_threshold = cv::threshold(grey_img, dst, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
         kernel_edge_detect(device_dst_grey, device_img_grey, width, height, 1, otsu_threshold);
     }
     else
@@ -88,10 +89,10 @@ int main(int argc, char** argv)
     }
 
     cudaDeviceSynchronize();
-    cv::namedWindow("Display Window", CV_WINDOW_AUTOSIZE);
+    cv::namedWindow("Display Window", cv::WINDOW_AUTOSIZE);
     if (func_name != "edge_detect")
     {
-        cudaMemcpy(out, device_dst, height * width * sizeof (Rgb), cudaMemcpyDeviceToHost);
+        cudaMemcpy(out, device_dst, height * width * sizeof(Rgb), cudaMemcpyDeviceToHost);
 
         device_to_img(out, image);
 
@@ -102,7 +103,7 @@ int main(int argc, char** argv)
     }
     else
     {
-        cudaMemcpy(out_grey, device_dst_grey, height * width * sizeof (Rgb), cudaMemcpyDeviceToHost);
+        cudaMemcpy(out_grey, device_dst_grey, height * width * sizeof(Rgb), cudaMemcpyDeviceToHost);
 
         device_to_img_grey(out_grey, grey_img);
 
